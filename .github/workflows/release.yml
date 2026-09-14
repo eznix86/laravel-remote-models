@@ -1,14 +1,15 @@
-name: Update Changelog
+name: release
 
 on:
-  release:
-    types: [released]
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
 
 jobs:
-  update:
+  release:
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -18,11 +19,26 @@ jobs:
         with:
           ref: main
 
+      - name: Create the release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" --verify-tag --generate-notes
+
+          delimiter="$(openssl rand -hex 16)"
+
+          {
+            echo "notes<<${delimiter}"
+            gh release view "${GITHUB_REF_NAME}" --json body --jq .body
+            echo "${delimiter}"
+          } >> "${GITHUB_OUTPUT}"
+
       - name: Update changelog
         uses: stefanzweifel/changelog-updater-action@a938690fad7edf25368f37e43a1ed1b34303eb36 # v1
         with:
-          latest-version: ${{ github.event.release.name }}
-          release-notes: ${{ github.event.release.body }}
+          latest-version: ${{ github.ref_name }}
+          release-notes: ${{ steps.release.outputs.notes }}
 
       - name: Commit updated changelog
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7

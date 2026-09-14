@@ -42,3 +42,8 @@ Run all tests:
 ```bash
 composer test
 ```
+
+## Releases
+
+Push a `v*` tag on `main`. The release workflow creates the GitHub release with
+generated notes and commits the changelog. Do not write `CHANGELOG.md` by hand.
