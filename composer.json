@@ -1,0 +1,121 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "eznix86/laravel-remote-models",
+    "description": "Eloquent models for remote APIs",
+    "keywords": [
+        "laravel",
+        "eznix86",
+        "laravel-remote-models"
+    ],
+    "homepage": "https://github.com/eznix86/laravel-remote-models",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bruno Bernard",
+            "email": "contact.brunobernard@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "guzzlehttp/guzzle": "^7.8.2||^8.0",
+        "illuminate/console": "^13.0",
+        "illuminate/database": "^13.0",
+        "illuminate/http": "^13.0",
+        "illuminate/support": "^13.0",
+        "league/uri": "^7.5"
+    },
+    "require-dev": {
+        "driftingly/rector-laravel": "^2.6",
+        "larastan/larastan": "^3.12",
+        "laravel/pao": "^1.0",
+        "laravel/pint": "^1.29",
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^5.0",
+        "pestphp/pest-plugin-laravel": "^5.0",
+        "pestphp/pest-plugin-rector": "^5.0",
+        "pestphp/pest-plugin-type-coverage": "^5.0",
+        "phpstan/extension-installer": "^1.4",
+        "rector/rector": "^2.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "RemoteModels\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RemoteModels\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "prepare": [
+            "@php vendor/bin/testbench package:discover --ansi"
+        ],
+        "build": [
+            "@php vendor/bin/testbench workbench:build --ansi"
+        ],
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ],
+        "lint": [
+            "vendor/bin/pint --parallel"
+        ],
+        "lint:check": [
+            "vendor/bin/pint --parallel --test"
+        ],
+        "analyse": [
+            "vendor/bin/phpstan analyse"
+        ],
+        "refactor": [
+            "vendor/bin/rector"
+        ],
+        "refactor:check": [
+            "vendor/bin/rector --dry-run"
+        ],
+        "test:types": [
+            "vendor/bin/pest --type-coverage --min=100"
+        ],
+        "test:unit": [
+            "vendor/bin/pest --parallel"
+        ],
+        "test": [
+            "@refactor:check",
+            "@analyse",
+            "@lint:check",
+            "@test:types",
+            "@test:unit"
+        ],
+        "clear": [
+            "@php vendor/bin/testbench package:purge-skeleton --ansi"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "RemoteModels\\RemoteModelsServiceProvider"
+            ],
+            "aliases": {
+                "Remote": "RemoteModels\\Facades\\Remote"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

@@ -1,0 +1,18 @@
+<?php
+
+namespace {{ factoryNamespace }};
+
+use {{ namespacedModel }};
+use RemoteModels\Factories\RemoteFactory;
+
+class {{ factory }} extends RemoteFactory
+{
+    protected $model = {{ model }}::class;
+
+    public function definition(): array
+    {
+        return [
+            //
+        ];
+    }
+}

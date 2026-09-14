@@ -1,0 +1,30 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
+use RemoteModels\Concerns\HasRemoteFactory;
+use RemoteModels\RemoteModel;
+
+class {{ class }} extends RemoteModel
+{
+    use HasRemoteFactory;
+
+    protected $fillable = [];
+
+    protected function casts(): array
+    {
+        return [];
+    }
+
+    protected function index(PendingRequest $http, array $query): Response
+    {
+        return $http->get('{{ endpoint }}', $query);
+    }
+
+    protected function show(PendingRequest $http, string|int $id): Response
+    {
+        return $http->get('{{ endpoint }}/'.$id);
+    }
+}

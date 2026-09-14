@@ -1,0 +1,20 @@
+<?php
+
+namespace {{ namespace }};
+
+use RemoteModels\Attributes\Endpoint;
+use RemoteModels\Concerns\HasRemoteFactory;
+use RemoteModels\RemoteModel;
+
+#[Endpoint('{{ endpoint }}')]
+class {{ class }} extends RemoteModel
+{
+    use HasRemoteFactory;
+
+    protected $fillable = [];
+
+    protected function casts(): array
+    {
+        return [];
+    }
+}

@@ -1,0 +1,7 @@
+parameters:
+    level: max
+    paths:
+        - src
+        - config
+        - tests/Fixtures
+    tmpDir: build/phpstan
