@@ -1,13 +1,13 @@
 ---
 name: laravel-remote-models-development
 description: >
-  Configure and apply the Laravel Remote Models package in Laravel applications.
+  Configure and apply the Remote Models for Laravel package in a Laravel application.
 license: MIT
 metadata:
   author: Bruno Bernard
 ---
 
-# Laravel Remote Models
+# Remote Models for Laravel
 
 Use this skill when a Laravel application needs to read or write an HTTP API through Eloquent.
 
