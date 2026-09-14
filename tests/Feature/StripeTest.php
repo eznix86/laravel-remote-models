@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -15,7 +16,7 @@ use RemoteModels\Tests\Fixtures\User;
 beforeEach(function (): void {
     Http::preventStrayRequests();
 
-    Schema::create('users', function ($table): void {
+    Schema::create('users', function (Blueprint $table): void {
         $table->id();
         $table->string('name');
         $table->string('stripe_id')->nullable();
@@ -56,7 +57,7 @@ it('filters invoices with the bracket style stripe reads', function (): void {
         ->limit(100)
         ->get();
 
-    $url = urldecode(Http::recorded()->last()[0]->url());
+    $url = lastUrl();
 
     expect($url)->toContain('status=open')
         ->toContain('created[gte]=1767225600')
@@ -223,7 +224,7 @@ it('reads a filtered page of invoices in one request', function (): void {
 
     Http::assertSentCount(1);
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))
+    expect(lastUrl())
         ->toBe('https://api.stripe.com/v1/invoices?customer=cus_NffrFeUfNV2Hib&status=open&created[gte]=1767225600&limit=100');
 });
 
@@ -232,7 +233,7 @@ it('composes a scope with further filters', function (): void {
 
     Invoice::open()->where('customer', 'cus_1')->get();
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))
+    expect(lastUrl())
         ->toBe('https://api.stripe.com/v1/invoices?status=open&customer=cus_1');
 });
 
@@ -247,7 +248,7 @@ it('sends only the filters that are set', function (): void {
         ->when($status !== null, fn (RemoteBuilder $query) => $query->where('status', $status))
         ->get();
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))
+    expect(lastUrl())
         ->toBe('https://api.stripe.com/v1/invoices?customer=cus_1');
 });
 

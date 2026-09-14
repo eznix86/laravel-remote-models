@@ -44,7 +44,7 @@ it('sends a date comparison, a null check and an ordering', function (): void {
         ->latest('published_at')
         ->get();
 
-    $url = urldecode(Http::recorded()->last()[0]->url());
+    $url = lastUrl();
 
     expect($url)->toContain('published_at__lte=2026-09-14T10:00:00+00:00')
         ->toContain('archived_at__null=true')
@@ -67,7 +67,7 @@ it('sends bracket filters for a conditional range', function (): void {
         ->where('created_at', '<=', '2026-12-31')
         ->get();
 
-    $url = urldecode(Http::recorded()->last()[0]->url());
+    $url = lastUrl();
 
     expect($url)->toContain('merchant_id=12')
         ->toContain('created_at[gte]=2026-01-01')
@@ -83,7 +83,7 @@ it('sends a whereIn of backed enums as their values', function (): void {
         ->oldest()
         ->get();
 
-    $url = urldecode(Http::recorded()->last()[0]->url());
+    $url = lastUrl();
 
     expect($url)->toContain('status=pending,payment_failed')
         ->toContain('direction=asc');
@@ -96,7 +96,7 @@ it('flattens a nested group of and clauses', function (): void {
         ->where(fn (Builder $query) => $query->where('number', 'like', '%INV%')->where('paid', true))
         ->get();
 
-    $url = urldecode(Http::recorded()->last()[0]->url());
+    $url = lastUrl();
 
     expect($url)->toContain('number[like]=%INV%')
         ->toContain('paid=true');
@@ -107,7 +107,7 @@ it('turns a whereBetween into a pair of bounds', function (): void {
 
     Order::query()->whereBetween('total', [10, 99])->get();
 
-    $url = urldecode(Http::recorded()->last()[0]->url());
+    $url = lastUrl();
 
     expect($url)->toContain('total[gte]=10')->toContain('total[lte]=99');
 });
@@ -117,7 +117,7 @@ it('turns a whereNotIn into a negated list', function (): void {
 
     Order::query()->whereNotIn('status', ['draft', 'void'])->get();
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))->toContain('status[nin]=draft,void');
+    expect(lastUrl())->toContain('status[nin]=draft,void');
 });
 
 it('reads a relation of a model found by key', function (): void {
@@ -177,7 +177,7 @@ it('filters on a nested field with a dotted column', function (): void {
 
     $comment = Comment::query()->where('state.flagged', true)->first();
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))->toContain('state.flagged=true')
+    expect(lastUrl())->toContain('state.flagged=true')
         ->and($comment->state['flagged'])->toBeTrue()
         ->and(data_get($comment, 'state.reason'))->toBe('spam');
 });
@@ -187,7 +187,7 @@ it('orders on a nested field', function (): void {
 
     Comment::query()->orderBy('state.flagged', 'desc')->get();
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))->toContain('sort=state.flagged');
+    expect(lastUrl())->toContain('sort=state.flagged');
 });
 
 it('sends a select as a sparse fieldset', function (): void {
@@ -195,7 +195,7 @@ it('sends a select as a sparse fieldset', function (): void {
 
     Comment::query()->select('id', 'body', 'state.flagged')->get();
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))->toContain('fields=id,body,state.flagged');
+    expect(lastUrl())->toContain('fields=id,body,state.flagged');
 });
 
 it('ignores a select when the model names no fields parameter', function (): void {
@@ -203,7 +203,7 @@ it('ignores a select when the model names no fields parameter', function (): voi
 
     Order::query()->select('id', 'total')->get();
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))->not->toContain('fields');
+    expect(lastUrl())->not->toContain('fields');
 });
 
 it('checks a nested field for null', function (): void {
@@ -211,5 +211,5 @@ it('checks a nested field for null', function (): void {
 
     Comment::query()->whereNull('state.reason')->get();
 
-    expect(urldecode(Http::recorded()->last()[0]->url()))->toContain('state.reason__null=true');
+    expect(lastUrl())->toContain('state.reason__null=true');
 });
