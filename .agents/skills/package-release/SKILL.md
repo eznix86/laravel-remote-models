@@ -18,13 +18,14 @@ Prepare a safe package release checklist and implementation without tagging, pus
 2. Validate the release state with `composer test` before recommending a release.
 3. Confirm whether version metadata needs to change; many Laravel packages rely on Git tags rather than a hardcoded package version.
 4. Review tag naming, release branch, and GitHub release workflow behavior before any release command.
-5. Do not tag, push, or publish without explicit user approval.
+5. Release by pushing a `v*` tag. `.github/workflows/release.yml` creates the GitHub release with generated notes and commits the changelog, so neither is written by hand.
+6. Do not tag, push, or publish without explicit user approval.
 
 ## References
 
 - `CHANGELOG.md`
 - `.github/release.yml`
-- `.github/workflows/update-changelog.yml`
+- `.github/workflows/release.yml`
 - `.github/workflows/tests.yml`
 - `composer.json`
 
