@@ -130,6 +130,23 @@ pages with `limit`:
 class Customer extends RemoteModel {}
 ```
 
+A chain is one request, sent when you ask for the result:
+
+```php
+Invoice::open()
+    ->where('customer', $customer->getKey())
+    ->where('created', '>=', $startOfYear)
+    ->limit(100)
+    ->get();
+
+// GET /v1/invoices?status=open&customer=cus_NffrFeUfNV2Hib&created[gte]=1767225600&limit=100
+```
+
+What comes back is an Eloquent collection of models with the casts already run, so
+`sum()`, `groupBy()` and the rest work as usual. Scopes, `when()`, `first()`,
+`exists()`, `count()`, `find()`, `findOrFail()` and `cursor()->each()` all behave
+the way they do on a database model.
+
 Query state becomes query parameters: `where` sends `column=value`, `whereIn`
 joins with commas, `orderBy` sends `sort` and `direction`, `limit` and `offset`
 send `per_page` and `page`. Enums send their value, dates send ISO 8601, booleans

@@ -7,6 +7,7 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use RemoteModels\Facades\Remote;
+use RemoteModels\RemoteBuilder;
 use RemoteModels\Tests\Fixtures\Remote\Stripe\Customer;
 use RemoteModels\Tests\Fixtures\Remote\Stripe\Invoice;
 use RemoteModels\Tests\Fixtures\User;
@@ -195,4 +196,93 @@ it('reads the invoices of a local user', function (): void {
     Http::assertSent(
         fn (Request $request): bool => str_contains($request->url(), 'customer=cus_1'),
     );
+});
+
+it('reads a filtered page of invoices in one request', function (): void {
+    Http::fake([
+        'api.stripe.com/v1/invoices*' => Http::response([
+            'has_more' => false,
+            'data' => [
+                ['id' => 'in_1', 'amount_due' => 1000, 'currency' => 'usd', 'created' => 1767225600, 'paid' => false],
+                ['id' => 'in_2', 'amount_due' => 2000, 'currency' => 'usd', 'created' => 1767312000, 'paid' => false],
+            ],
+        ]),
+    ]);
+
+    $invoices = Invoice::query()
+        ->where('customer', 'cus_NffrFeUfNV2Hib')
+        ->where('status', 'open')
+        ->where('created', '>=', 1767225600)
+        ->limit(100)
+        ->get();
+
+    expect($invoices)->toHaveCount(2)
+        ->and($invoices->sum('amount_due'))->toBe(3000)
+        ->and($invoices->groupBy('currency')->keys()->all())->toBe(['usd'])
+        ->and($invoices->first()->created->format('Y-m-d'))->toBe('2026-01-01');
+
+    Http::assertSentCount(1);
+
+    expect(urldecode(Http::recorded()->last()[0]->url()))
+        ->toBe('https://api.stripe.com/v1/invoices?customer=cus_NffrFeUfNV2Hib&status=open&created[gte]=1767225600&limit=100');
+});
+
+it('composes a scope with further filters', function (): void {
+    Http::fake(['api.stripe.com/v1/invoices*' => Http::response(['has_more' => false, 'data' => []])]);
+
+    Invoice::open()->where('customer', 'cus_1')->get();
+
+    expect(urldecode(Http::recorded()->last()[0]->url()))
+        ->toBe('https://api.stripe.com/v1/invoices?status=open&customer=cus_1');
+});
+
+it('sends only the filters that are set', function (): void {
+    Http::fake(['api.stripe.com/v1/invoices*' => Http::response(['has_more' => false, 'data' => []])]);
+
+    $customer = 'cus_1';
+    $status = null;
+
+    Invoice::query()
+        ->when($customer !== null, fn (RemoteBuilder $query) => $query->where('customer', $customer))
+        ->when($status !== null, fn (RemoteBuilder $query) => $query->where('status', $status))
+        ->get();
+
+    expect(urldecode(Http::recorded()->last()[0]->url()))
+        ->toBe('https://api.stripe.com/v1/invoices?customer=cus_1');
+});
+
+it('answers first, exists and count from the index route', function (): void {
+    Http::fake([
+        'api.stripe.com/v1/invoices*' => Http::response([
+            'has_more' => false,
+            'data' => [['id' => 'in_1'], ['id' => 'in_2']],
+        ]),
+    ]);
+
+    expect(Invoice::open()->count())->toBe(2)
+        ->and(Invoice::open()->exists())->toBeTrue()
+        ->and(Invoice::open()->first())->toBeInstanceOf(Invoice::class);
+});
+
+it('walks every invoice one page at a time', function (): void {
+    Http::fake([
+        'api.stripe.com/v1/invoices?status=open&limit=2&starting_after=in_2' => Http::response([
+            'has_more' => false,
+            'data' => [['id' => 'in_3']],
+        ]),
+        'api.stripe.com/v1/invoices*' => Http::response([
+            'has_more' => true,
+            'data' => [['id' => 'in_1'], ['id' => 'in_2']],
+        ]),
+    ]);
+
+    $seen = [];
+
+    Invoice::open()->limit(2)->cursor()->each(function (Invoice $invoice) use (&$seen): void {
+        $seen[] = $invoice->getKey();
+    });
+
+    expect($seen)->toBe(['in_1', 'in_2', 'in_3']);
+
+    Http::assertSentCount(2);
 });

@@ -224,8 +224,81 @@ Writing goes through a model instance. `Customer::query()->update([...])` throws
 
 ## Queries
 
-Query state becomes query parameters. Every model understands equality, lists,
-ordering and paging with no configuration.
+You query a remote model with the Eloquent builder you already use. Each chain is
+one request, and it is sent when you ask for the result, not before.
+
+```php
+$invoices = Invoice::query()
+    ->where('customer', $customer->getKey())
+    ->where('status', 'open')
+    ->where('created', '>=', $startOfYear)
+    ->limit(100)
+    ->get();
+```
+
+```http
+GET /v1/invoices?customer=cus_NffrFeUfNV2Hib&status=open&created[gte]=1767225600&limit=100
+```
+
+What comes back is an Eloquent collection of models, so the rest is what you would
+do with any other collection, and the casts on the model have already run:
+
+```php
+$invoices->sum('amount_due');
+$invoices->groupBy('currency');
+$invoices->first()->created->format('Y-m-d');
+```
+
+Scopes compose the same way:
+
+```php
+#[Scope]
+protected function open(RemoteBuilder $query): RemoteBuilder
+{
+    return $query->where('status', 'open');
+}
+```
+
+```php
+Invoice::open()->where('customer', 'cus_1')->get();
+
+// GET /v1/invoices?status=open&customer=cus_1
+```
+
+`when()` builds a filter only when you have one to apply:
+
+```php
+Invoice::query()
+    ->when($customer !== null, fn (RemoteBuilder $query) => $query->where('customer', $customer))
+    ->when($status !== null, fn (RemoteBuilder $query) => $query->where('status', $status))
+    ->get();
+
+// GET /v1/invoices?customer=cus_1
+```
+
+Single records and counts read as usual. `find()` and `findOrFail()` go to the
+read route, the others read the list route and work on what comes back:
+
+```php
+Customer::find('cus_NffrFeUfNV2Hib');   // GET /v1/customers/cus_NffrFeUfNV2Hib
+Customer::findOrFail('cus_missing');    // ModelNotFoundException on a 404
+Invoice::open()->first();
+Invoice::open()->exists();
+Invoice::open()->count();
+```
+
+`cursor()` walks everything a page at a time and stops as soon as you stop:
+
+```php
+Invoice::open()->limit(100)->cursor()->each(function (Invoice $invoice): void {
+    // ...
+});
+```
+
+Everything else is Eloquent too: casts, accessors, `#[Scope]`, model events,
+`toArray()`, `toJson()`, and route model binding through `resolveRouteBinding()`.
+
+### What the builder sends
 
 | Builder | Sent |
 |---|---|
@@ -237,7 +310,8 @@ ordering and paging with no configuration.
 
 Values are formatted for the wire: a backed enum sends its value, a `DateTime`
 sends ISO 8601, a boolean sends `true` or `false`. A value that cannot go in a
-query string throws rather than disappearing.
+query string throws rather than disappearing. Stripe wants unix seconds on
+`created`, so pass `$date->getTimestamp()` there.
 
 Nested fields are dotted columns. `where('metadata.user_id', 7)` sends
 `metadata.user_id=7`, and `orderBy('metadata.rank')` sorts on it.
