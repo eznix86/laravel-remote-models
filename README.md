@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>Laravel Remote Models</h1>
+    <h1>Remote Models for Laravel</h1>
 </div>
 
 <p align="center">
@@ -547,7 +547,7 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Thank you for considering contributing to Laravel Remote Models! Please review our [contributing guide](.github/CONTRIBUTING.md) to get started.
+Thank you for considering contributing to Remote Models for Laravel! Please review our [contributing guide](.github/CONTRIBUTING.md) to get started.
 
 ## Security Vulnerabilities
 
@@ -560,4 +560,4 @@ Please review [our security policy](.github/SECURITY.md) on how to report securi
 
 ## License
 
-Laravel Remote Models is open-sourced software licensed under the [MIT license](LICENSE.md).
+Remote Models for Laravel is open-sourced software licensed under the [MIT license](LICENSE.md).
