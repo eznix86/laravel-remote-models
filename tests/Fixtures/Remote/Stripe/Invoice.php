@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace RemoteModels\Tests\Fixtures\Remote\Stripe;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Http\Client\Response;
 use RemoteModels\Attributes\BracketFilters;
 use RemoteModels\Attributes\Endpoint;
 use RemoteModels\Attributes\Paging;
 use RemoteModels\Attributes\Persist;
 use RemoteModels\NextPage;
+use RemoteModels\RemoteBuilder;
 use RemoteModels\RemoteModel;
 
 #[Endpoint('/v1/invoices', key: 'id', keyType: 'string')]
@@ -29,6 +31,16 @@ class Invoice extends RemoteModel
             'created' => 'immutable_datetime',
             'paid' => 'boolean',
         ];
+    }
+
+    /**
+     * @param  RemoteBuilder<self>  $query
+     * @return RemoteBuilder<self>
+     */
+    #[Scope]
+    protected function open(RemoteBuilder $query): RemoteBuilder
+    {
+        return $query->where('status', 'open');
     }
 
     /**
