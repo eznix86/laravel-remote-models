@@ -5,3 +5,5 @@ parameters:
         - config
         - tests/Fixtures
     tmpDir: build/phpstan
+    parallel:
+        maximumNumberOfProcesses: 1
