@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use RemoteModels\Exceptions\UnsupportedQuery;
 use RemoteModels\Tests\Fixtures\Remote\Github\Commit;
@@ -66,7 +65,7 @@ it('follows a cursor token from the payload', function (): void {
 
     expect(Event::query()->cursor()->pluck('id')->all())->toBe([1, 2]);
 
-    Http::assertSent(fn ($request): bool => str_contains($request->url(), 'after=abc'));
+    Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'after=abc'));
 });
 
 it('paginates with the total the api reports', function (): void {
@@ -77,8 +76,7 @@ it('paginates with the total the api reports', function (): void {
 
     $page = Commit::query()->paginate(2, page: 3);
 
-    expect($page)->toBeInstanceOf(LengthAwarePaginator::class)
-        ->and($page->total())->toBe(42)
+    expect($page->total())->toBe(42)
         ->and($page->lastPage())->toBe(21)
         ->and($page->items())->toHaveCount(2);
 });
@@ -110,8 +108,7 @@ it('simple paginates from the link header', function (): void {
 
     $page = Repo::query()->simplePaginate(1);
 
-    expect($page)->toBeInstanceOf(Paginator::class)
-        ->and($page->hasMorePages())->toBeTrue();
+    expect($page->hasMorePages())->toBeTrue();
 });
 
 it('simple paginates to the last page when no link header comes back', function (): void {

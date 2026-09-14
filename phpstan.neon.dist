@@ -4,6 +4,8 @@ parameters:
         - src
         - config
         - tests/Fixtures
+        - tests/Pest.php
+        - tests/TestCase.php
     tmpDir: build/phpstan
     parallel:
         maximumNumberOfProcesses: 1

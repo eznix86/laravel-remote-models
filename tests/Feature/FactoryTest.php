@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Client\StrayRequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -10,7 +11,7 @@ use RemoteModels\Tests\Fixtures\Remote\Github\Repo;
 use RemoteModels\Tests\Fixtures\User;
 
 beforeEach(function (): void {
-    Schema::create('users', function ($table): void {
+    Schema::create('users', function (Blueprint $table): void {
         $table->id();
         $table->string('name');
         $table->string('github_login')->nullable();

@@ -1,0 +1,11 @@
+parameters:
+    level: 1
+    paths:
+        - tests/Feature
+        - tests/Unit
+    scanFiles:
+        - tests/Pest.php
+    tmpDir: build/phpstan-tests
+    noUnnecessaryCollectionCall: false
+    parallel:
+        maximumNumberOfProcesses: 1

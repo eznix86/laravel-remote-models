@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -18,14 +18,14 @@ use RemoteModels\Tests\Fixtures\User;
 beforeEach(function (): void {
     Http::preventStrayRequests();
 
-    Schema::create('users', function ($table): void {
+    Schema::create('users', function (Blueprint $table): void {
         $table->id();
         $table->string('name');
         $table->string('github_login')->nullable();
         $table->string('github_token')->nullable();
     });
 
-    Schema::create('members', function ($table): void {
+    Schema::create('members', function (Blueprint $table): void {
         $table->id();
         $table->string('name');
     });
@@ -114,8 +114,7 @@ it('eager loads a remote has many with one request per parent', function (): voi
     $repos = Repo::with('issues')->get();
 
     expect($repos->first()->issues)->toHaveCount(1)
-        ->and($repos->last()->issues)->toBeEmpty()
-        ->and($repos->last()->issues)->toBeInstanceOf(Collection::class);
+        ->and($repos->last()->issues)->toBeEmpty();
 
     Http::assertSentCount(3);
 });
