@@ -1,6 +1,18 @@
 # Release Notes
 
-## [Unreleased](https://github.com/eznix86/laravel-remote-models/compare/v0.1.0...HEAD)
+## [Unreleased](https://github.com/eznix86/laravel-remote-models/compare/v0.1.1...HEAD)
+
+## [v0.1.1](https://github.com/eznix86/laravel-remote-models/compare/v0.1.0...v0.1.1) - 2026-09-14
+
+<!-- Release notes generated using configuration in .github/release.yml at v0.1.1 -->
+### What's Changed
+
+#### Other Changes
+
+* fix: let the changelog updater insert the first release by @eznix86 in https://github.com/eznix86/laravel-remote-models/pull/9
+* docs: rename the boost skill title to match the readme by @eznix86 in https://github.com/eznix86/laravel-remote-models/pull/10
+
+**Full Changelog**: https://github.com/eznix86/laravel-remote-models/compare/v0.1.0...v0.1.1
 
 ## [v0.1.0](https://github.com/eznix86/laravel-remote-models/compare/v0.1.0...v0.1.0) - 2026-09-14
 
